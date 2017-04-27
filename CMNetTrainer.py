@@ -81,7 +81,7 @@ class CMNetTrainer:
             img:
         """
         #TODO
-        return [10, 10]
+        return tf.constant([10, 10], dtype=tf.int32)
 
     def roi_prediction_loss(self, preds, rois, margin, scope):
         for i in range(self.num_roi):
