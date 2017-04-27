@@ -62,8 +62,8 @@ class CMNetTrainer:
             [img1] = provider.get(['image'])
             coords1 = self.create_train_coordinates(img1)
 
-            img2 = tf.copy(img1)
-            coords2 = tf.copy(coords1)
+            img2 = tf.identity(img1)
+            coords2 = tf.identity(coords1)
 
             # Preprocess data
             img1, coords1 = self.pre_processor.process_train(img1, coords1)
