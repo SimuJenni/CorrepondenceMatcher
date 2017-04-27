@@ -15,30 +15,7 @@ class Preprocessor:
         self.aspect_ratio_range = aspect_ratio_range
         self.area_range = area_range
 
-    def process_train(self, img, box, im_size):
-        # Select random crops
-
-        # im_size = tf.to_float(im_size)
-        # box = tf.reshape(box, [1, 1, 4])
-        # print(box.get_shape().as_list())
-        # box = tf.div(box, [im_size[0], im_size[1], im_size[0], im_size[1]])
-        # image = distort_image(img, box, self.target_shape[0], self.target_shape[1],
-        #                       self.aspect_ratio_range, self.area_range)
-
-        # box = tf.to_int32(box)
-        # image = tf.image.crop_to_bounding_box(img, box[1], box[0], box[3]-box[1]+1, box[2]-box[0]+1)
-        # image = tf.expand_dims(image, axis=0)
-        # image = tf.image.resize_bilinear(image, [self.target_shape[0], self.target_shape[1]], align_corners=False)
-        # image = tf.squeeze(image, [0])
-        # image.set_shape([self.target_shape[0], self.target_shape[1], 3])
-
-        box = tf.to_int32(box)
-        distorted_image = tf.slice(img, [box[1], box[0], 0], [box[3]-box[1], box[2]-box[0], 3])
-        distorted_image = tf.expand_dims(distorted_image, 0)
-        resized_image = tf.image.resize_bilinear(distorted_image, [self.target_shape[0], self.target_shape[1]], align_corners=False)
-        image = tf.squeeze(resized_image)
-        image.set_shape([self.target_shape[0], self.target_shape[1], 3])
-
+    def process_train(self, image, coord):
         # Color and contrast augmentation
         image = tf.to_float(image) / 255.
         if self.augment_color:
@@ -48,10 +25,11 @@ class Preprocessor:
         # Scale to [-1, 1]
         image = tf.to_float(image) * 2. - 1.
 
+        #TODO: Adjust flip with coord
         # Flip left-right
-        image = tf.image.random_flip_left_right(image)
+        # image = tf.image.random_flip_left_right(image)
 
-        return image
+        return image, coord
 
     def process_test(self, image):
         # Crop the central region of the image with an area containing 85% of the original image.
