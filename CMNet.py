@@ -102,7 +102,7 @@ class CMNet:
                 return net
 
     def extract_roi(self, fmap, coord):
-        roi = tf.slice(fmap, [coord[0], coord[1], 0], [1, 1, DEFAULT_FILTER_DIMS[-1]])
+        roi = tf.slice(fmap, [0, coord[:, 0], coord[:, 1], 0], [1, 1, 1, DEFAULT_FILTER_DIMS[-1]])
         return roi
 
     def roi_context(self, fmap, coord):
