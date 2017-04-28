@@ -114,7 +114,7 @@ class CMNet:
         coord_tiled = tf.reshape(tf.tile(coord, [1, DEFAULT_FILTER_DIMS[-1]]),
                                  (self.batch_size, DEFAULT_FILTER_DIMS[-1], 2))
         print('Coord tiled: {}'.format(coord_tiled.get_shape()))
-        roi = tf.gather_nd(fmap_tr, coord)
+        roi = tf.gather_nd(fmap_tr, coord_tiled)
         print('Roi: {}'.format(roi.get_shape()))
         return roi
 
