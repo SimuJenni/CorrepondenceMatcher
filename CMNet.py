@@ -105,7 +105,7 @@ class CMNet:
         print(fmap.get_shape())
         print(coord.get_shape())
         #roi = tf.gather_nd(fmap, [range(self.batch_size), tf.squeeze(cs[0]), tf.squeeze(cs[1]), range(DEFAULT_FILTER_DIMS[-1])])
-        roi = tf.gather_nd(fmap, coord)
+        roi = tf.gather_nd(fmap, tf.squeeze(coord))
         print(roi.get_shape())
         return roi
 
