@@ -71,9 +71,10 @@ class CMNetTrainer:
             img2, coords2 = self.pre_processor.process_train(img2, coords2)
 
             # Make batches
-            imgs1, imgs2, coords1, coords2 = tf.train.batch([img1, img2, coords1, coords2], batch_size=self.model.batch_size*2, num_threads=8,
-                                                            capacity=self.model.batch_size*2)
-
+            imgs1, imgs2, coords1, coords2 = tf.train.batch([img1, img2, coords1, coords2],
+                                                            batch_size=self.model.batch_size,
+                                                            num_threads=8,
+                                                            capacity=self.model.batch_size)
             return imgs1, imgs2, coords1, coords2
 
     def create_train_coordinates(self, img):
