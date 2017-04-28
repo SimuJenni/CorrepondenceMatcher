@@ -92,7 +92,7 @@ class CMNet:
         return preds1, preds2, rois1, rois2
 
     def split_coordinates(self, coords, num_roi):
-        return tf.split(0, num_roi, coords)
+        return tf.squeeze(tf.split(0, num_roi, coords))
 
     def predict_roi(self, context, reuse=None, training=True):
         with tf.variable_scope('roi_regressor', reuse=reuse):
