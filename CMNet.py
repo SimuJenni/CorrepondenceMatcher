@@ -106,6 +106,7 @@ class CMNet:
         print(fmap.get_shape())
         print(coord.get_shape())
         cs = tf.split(1, 2, coord)
+        print(cs[0].get_shape())
         roi = tf.slice(fmap, [0, cs[0], cs[1], 0], [self.batch_size, 1, 1, DEFAULT_FILTER_DIMS[-1]])
         return roi
 
