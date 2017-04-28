@@ -21,6 +21,7 @@ class Preprocessor:
         if self.augment_color:
             image = dist_color(image, 0)
             image = tf.clip_by_value(image, 0.0, 1.0)
+        image.set_shape([self.target_shape[0], self.target_shape[0], 3])
 
         # Scale to [-1, 1]
         image = tf.to_float(image) * 2. - 1.
