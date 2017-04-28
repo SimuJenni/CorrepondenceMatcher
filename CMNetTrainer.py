@@ -4,6 +4,7 @@ from tensorflow.python.ops import control_flow_ops
 from tensorflow.python.ops import math_ops
 
 import os
+import numpy as np
 
 from utils import montage_tf, get_variables_to_train
 from constants import LOG_DIR
@@ -81,7 +82,8 @@ class CMNetTrainer:
             img:
         """
         #TODO
-        return tf.constant([10, 10], dtype=tf.int32, shape=(2,))
+        shape = (self.num_roi, 2)
+        return tf.constant(10*np.ones(shape, dtype=np.int32), dtype=tf.int32, shape=shape)
 
     def roi_prediction_loss(self, preds, rois, margin, scope):
         for i in range(self.num_roi):

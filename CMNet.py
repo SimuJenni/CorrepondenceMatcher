@@ -61,14 +61,14 @@ class CMNet:
         self.batch_size = batch_size
         self.sc_factor = 4
 
-    def net(self, im1, im2, coords1, coords2, reuse=None, training=True):
+    def net(self, im1, im2, coords1, coords2, num_roi, reuse=None, training=True):
         """
 
         Args:
             im1:
             im2:
-            coords1: List of ROI coordinates in im1
-            coords2: List of ROI coordinates correpsonding to coords1 in im2
+            coords1: Tensor of ROI coordinates in im1
+            coords2: Tensor of ROI coordinates correpsonding to coords1 in im2
             reuse:
             training:
         """
@@ -76,6 +76,9 @@ class CMNet:
         rois2 = []
         preds1 = []
         preds2 = []
+
+        cs1 = self.split_coordinates(coords1, num_roi)
+        cs2 = self.split_coordinates(coords2, num_roi)
 
         enc1 = self.encoder(im1, reuse=reuse, training=training)
         enc2 = self.encoder(im2, reuse=True, training=training)
@@ -87,6 +90,9 @@ class CMNet:
             preds1.append(self.predict_roi(context1, reuse=reuse if i == 0 else True, training=training))
             preds2.append(self.predict_roi(context2, reuse=True, training=training))
         return preds1, preds2, rois1, rois2
+
+    def split_coordinates(self, coords, num_roi):
+        return tf.split(0, num_roi, coords)
 
     def predict_roi(self, context, reuse=None, training=True):
         with tf.variable_scope('roi_regressor', reuse=reuse):
