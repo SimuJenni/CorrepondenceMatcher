@@ -106,6 +106,8 @@ class CMNet:
 
     def extract_roi(self, fmap, coord):
         print('Feature map: {}'.format(fmap.get_shape()))
+        print('Feature map: {}'.format(tf.rank(fmap)))
+
         print('Coords: {}'.format(coord.get_shape()))
         coord = tf.squeeze(coord)
         print('Coords squeezed: {}'.format(coord.get_shape()))
