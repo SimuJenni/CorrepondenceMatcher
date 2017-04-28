@@ -102,12 +102,12 @@ class CMNet:
                 return net
 
     def extract_roi(self, fmap, coord):
-        coord = tf.squeeze(coord)
         print(fmap.get_shape())
         print(coord.get_shape())
-        cs = tf.split(1, 2, coord)
-        print(cs[0].get_shape())
-        roi = tf.slice(fmap, [0, cs[0], cs[1], 0], [self.batch_size, 1, 1, DEFAULT_FILTER_DIMS[-1]])
+        coord = tf.concat(3, range(DEFAULT_FILTER_DIMS[-1]))
+        print(coord.get_shape())
+        #roi = tf.gather_nd(fmap, [range(self.batch_size), tf.squeeze(cs[0]), tf.squeeze(cs[1]), range(DEFAULT_FILTER_DIMS[-1])])
+        roi = tf.gather_nd(fmap, coord)
         return roi
 
     def roi_context(self, fmap, coord):
