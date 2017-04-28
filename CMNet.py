@@ -82,7 +82,7 @@ class CMNet:
 
         enc1 = self.encoder(im1, reuse=reuse, training=training)
         enc2 = self.encoder(im2, reuse=True, training=training)
-        for i, (c1, c2) in enumerate(zip(coords1, coords2)):
+        for i, (c1, c2) in enumerate(zip(cs1, cs2)):
             rois1.append(self.extract_roi(enc1, c1))
             rois2.append(self.extract_roi(enc2, c2))
             context1 = self.roi_context(enc1, c1)

@@ -133,7 +133,8 @@ class CMNetTrainer:
                 imgs1, imgs2, coords1, coords2 = self.get_train_batch()
 
                 # Create the model
-                preds1, preds2, rois1, rois2 = self.model.net(imgs1, imgs2, coords1, coords2, reuse=None, training=True)
+                preds1, preds2, rois1, rois2 = self.model.net(imgs1, imgs2, coords1, coords2, num_roi=self.num_roi,
+                                                              reuse=None, training=True)
 
                 # Compute losses
                 roi_pred_loss = self.roi_prediction_loss(preds1, preds2, rois1, rois2)
