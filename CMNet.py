@@ -92,7 +92,10 @@ class CMNet:
         return preds1, preds2, rois1, rois2
 
     def split_coordinates(self, coords, num_roi):
-        return tf.split(1, num_roi, coords)
+        print('Before split: {}'.format(coords.get_shape()))
+        split = tf.split(1, num_roi, coords)
+        print('After split: {}'.format(split[0].get_shape()))
+        return split
 
     def predict_roi(self, context, reuse=None, training=True):
         with tf.variable_scope('roi_regressor', reuse=reuse):
@@ -102,13 +105,14 @@ class CMNet:
                 return net
 
     def extract_roi(self, fmap, coord):
-        print(fmap.get_shape())
-        print(coord.get_shape())
-        coord = tf.reshape(tf.squeeze(coord), [self.batch_size, 1, 1])
-        print(coord.get_shape())
-        #roi = tf.gather_nd(fmap, [range(self.batch_size), tf.squeeze(cs[0]), tf.squeeze(cs[1]), range(DEFAULT_FILTER_DIMS[-1])])
-        roi = tf.gather_nd(fmap, coord)
-        print(roi.get_shape())
+        print('Feature map: {}'.format(fmap.get_shape()))
+        print('Coords: {}'.format(coord.get_shape()))
+        coord = tf.squeeze(coord)
+        print('Coords squeezed: {}'.format(coord.get_shape()))
+        fmap_tr = tf.transpose(fmap, [0, 3, 1, 2])
+        print('Feature map perm: {}'.format(fmap_tr.get_shape()))
+        roi = tf.gather_nd(fmap_tr, coord)
+        print('Roi: {}'.format(roi.get_shape()))
         return roi
 
     def roi_context(self, fmap, coord):
