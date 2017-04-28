@@ -110,9 +110,8 @@ class CMNet:
                 return net
 
     def extract_roi(self, fmap, coord):
-        print('Feature map: {}'.format(fmap.get_shape()))
-        print('Coords: {}'.format(coord.get_shape()))
         roi = tf.gather_nd(fmap, coord)
+        roi = tf.reshape(roi, [self.batch_size, 1, 1, DEFAULT_FILTER_DIMS[-1]])
         print('Roi: {}'.format(roi.get_shape()))
         return roi
 
