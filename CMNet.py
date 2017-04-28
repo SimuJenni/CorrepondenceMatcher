@@ -103,6 +103,7 @@ class CMNet:
 
     def extract_roi(self, fmap, coord):
         print(fmap.get_shape())
+        print(coord.get_shape())
         roi = tf.slice(fmap, [0, coord[:, 0], coord[:, 1], 0], [1, 1, 1, DEFAULT_FILTER_DIMS[-1]])
         return roi
 
