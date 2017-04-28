@@ -107,9 +107,14 @@ class CMNet:
     def extract_roi(self, fmap, coord):
         print('Feature map: {}'.format(fmap.get_shape()))
         print('Coords: {}'.format(coord.get_shape()))
-        coord = tf.tile(coord, DEFAULT_FILTER_DIMS[-1])
+        coord = tf.squeeze(coord)
         print('Coords squeezed: {}'.format(coord.get_shape()))
-        roi = tf.gather_nd(fmap, coord)
+        fmap_tr = tf.transpose(fmap, [0, 3, 1, 2])
+        print('Feature map perm: {}'.format(fmap_tr.get_shape()))
+        coord_tiled = tf.reshape(tf.tile(coord, [1, DEFAULT_FILTER_DIMS[-1]]),
+                                 (self.batch_size, DEFAULT_FILTER_DIMS[-1], 2))
+        print('Coord tiled: {}'.format(coord_tiled.get_shape()))
+        roi = tf.gather_nd(fmap_tr, coord)
         print('Roi: {}'.format(roi.get_shape()))
         return roi
 
