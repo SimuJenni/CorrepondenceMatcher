@@ -78,15 +78,14 @@ class CMNet:
         preds2 = []
 
         enc1 = self.encoder(im1, reuse=reuse, training=training)
-        enc2 = self.encoder(im2, reuse=reuse, training=training)
-        for c1, c2 in zip(coords1, coords2):
+        enc2 = self.encoder(im2, reuse=True, training=training)
+        for i, (c1, c2) in enumerate(zip(coords1, coords2)):
             rois1.append(self.extract_roi(enc1, c1))
             rois2.append(self.extract_roi(enc2, c2))
             context1 = self.roi_context(enc1, c1)
             context2 = self.roi_context(enc2, c2)
-            preds1.append(self.predict_roi(context1))
-            preds2.append(self.predict_roi(context2))
-
+            preds1.append(self.predict_roi(context1, reuse=reuse if i == 0 else True, training=training))
+            preds2.append(self.predict_roi(context2, reuse=True, training=training))
         return preds1, preds2, rois1, rois2
 
     def predict_roi(self, context, reuse=None, training=True):
