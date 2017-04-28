@@ -105,7 +105,7 @@ class CMNet:
         coord = tf.squeeze(coord)
         print(fmap.get_shape())
         print(coord.get_shape())
-        roi = tf.slice(fmap, [0, coord[:, 0], coord[:, 1], 0], [1, 1, 1, DEFAULT_FILTER_DIMS[-1]])
+        roi = tf.slice(fmap, [0, coord[:, 0], coord[:, 1], 0], [self.batch_size, 1, 1, DEFAULT_FILTER_DIMS[-1]])
         return roi
 
     def roi_context(self, fmap, coord):
