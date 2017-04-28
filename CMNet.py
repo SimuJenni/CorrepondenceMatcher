@@ -100,7 +100,7 @@ class CMNet:
         return split
 
     def coords2indices(self, coords):
-        return tf.concat(1, [tf.range(self.batch_size), coords, tf.range(DEFAULT_FILTER_DIMS[-1])])
+        return tf.concat(1, [tf.reshape(tf.range(self.batch_size), [self.batch_size, 1]), tf.squeeze(coords)])
 
     def predict_roi(self, context, reuse=None, training=True):
         with tf.variable_scope('roi_regressor', reuse=reuse):
