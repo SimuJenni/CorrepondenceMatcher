@@ -71,7 +71,7 @@ class CMNetTrainer:
 
             # Make batches
             imgs1, imgs2, coords1, coords2 = tf.train.batch([img1, img2, coords1, coords2], batch_size=self.model.batch_size*2, num_threads=8,
-                                          capacity=self.model.batch_size*2)
+                                                            capacity=self.model.batch_size*2)
 
             return imgs1, imgs2, coords1, coords2
 
@@ -81,7 +81,7 @@ class CMNetTrainer:
             img:
         """
         #TODO
-        return tf.constant([10, 10], dtype=tf.int32)
+        return tf.constant([10, 10], dtype=tf.int32, shape=(2,))
 
     def roi_prediction_loss(self, preds, rois, margin, scope):
         for i in range(self.num_roi):
