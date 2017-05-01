@@ -89,7 +89,10 @@ class CMNet:
             rois2.append(self.extract_roi(enc2, idx2))
             context1 = self.roi_context(enc1, idx1)
             context2 = self.roi_context(enc2, idx1)
-            preds1.append(self.predict_roi(context1, reuse=reuse if i == 0 else True, training=training))
+            if i == 0:
+                preds1.append(self.predict_roi(context1, reuse=reuse, training=training))
+            else:
+                preds1.append(self.predict_roi(context1, reuse=True, training=training))
             preds2.append(self.predict_roi(context2, reuse=True, training=training))
         return preds1, preds2, rois1, rois2
 
