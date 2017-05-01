@@ -141,7 +141,7 @@ class CMNetTrainer:
                 margin = 2
                 scope = 'roi_pred_loss'
                 roi_pred_loss = self.roi_prediction_loss(preds1, rois1, margin=margin, scope=scope)
-                roi_pred_loss += self.roi_prediction_loss(preds2, rois2)
+                roi_pred_loss += self.roi_prediction_loss(preds2, rois2, margin=margin, scope=scope)
 
                 # Handle dependencies with update_ops (batch-norm)
                 update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
