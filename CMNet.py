@@ -100,8 +100,7 @@ class CMNet:
     def coords2indices(self, coords):
         return tf.concat(1, [tf.reshape(tf.range(self.batch_size), [self.batch_size, 1]), tf.squeeze(coords)])
 
-    def coords2context(self, coords):
-        idx = self.coords2indices(coords)
+    def idx2context(self, idx):
         context_ind = tf.tile(idx, multiples=[1, 3, 3, 1])
         context_ind += [[[[0, -1, -1, 0], [0, 0, -1, 0], [0, 1, -1, 0]],
                         [[0, -1, 0, 0], [0, 0, 0, 0], [0, 1, 0, 0]],
@@ -121,7 +120,7 @@ class CMNet:
         return roi
 
     def roi_context(self, fmap, coord):
-        context_idx = self.coords2context(coord)
+        context_idx = self.idx2context(coord)
         context_all = tf.gather_nd(fmap, context_idx)
         zero_context = tf.zeros_like(context_all)
         mask = np.ones([self.batch_size, 3, 3, DEFAULT_FILTER_DIMS[-1]], dtype=bool)
