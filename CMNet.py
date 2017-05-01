@@ -110,7 +110,7 @@ class CMNet:
 
     def predict_roi(self, context, reuse=None, training=True):
         with tf.variable_scope('roi_regressor', reuse=reuse):
-            with slim.arg_scope(cmnet_argscope(padding='SAME', training=training)):
+            with slim.arg_scope(cmnet_argscope(padding='VALID', training=training)):
                 net = slim.conv2d(context, num_outputs=512, stride=1, kernel_size=[3, 3], scope='conv_1')
                 net = slim.conv2d(net, num_outputs=256, stride=1, kernel_size=[1, 1], scope='conv_2')
                 return net
