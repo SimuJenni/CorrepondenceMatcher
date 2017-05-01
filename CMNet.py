@@ -89,10 +89,7 @@ class CMNet:
             rois2.append(self.extract_roi(enc2, idx2))
             context1 = self.roi_context(enc1, idx1)
             context2 = self.roi_context(enc2, idx1)
-            if i == 0:
-                preds1.append(self.predict_roi(context1, reuse=reuse, training=training))
-            else:
-                preds1.append(self.predict_roi(context1, reuse=True, training=training))
+            preds1.append(self.predict_roi(context1, reuse=reuse if i == 0 else True, training=training))
             preds2.append(self.predict_roi(context2, reuse=True, training=training))
         return preds1, preds2, rois1, rois2
 
@@ -115,7 +112,7 @@ class CMNet:
         with tf.variable_scope('roi_regressor', reuse=reuse):
             with slim.arg_scope(cmnet_argscope(padding='SAME', training=training)):
                 net = slim.conv2d(context, num_outputs=512, stride=1, kernel_size=[3, 3], scope='conv_1')
-                net = slim.conv2d(net, num_outputs=256, stride=1, kernel_size=[1, 1], scope='conv_1')
+                net = slim.conv2d(net, num_outputs=256, stride=1, kernel_size=[1, 1], scope='conv_2')
                 return net
 
     def extract_roi(self, fmap, coord):
@@ -137,8 +134,8 @@ class CMNet:
         with tf.variable_scope('roi_classifier', reuse=reuse):
             with slim.arg_scope(cmnet_argscope(padding='SAME', training=training, center=True)):
                 net = slim.conv2d(net, num_outputs=512, stride=1, kernel_size=[1, 1], scope='conv_1')
-                net = slim.conv2d(net, num_outputs=256, stride=1, kernel_size=[1, 1], scope='conv_1')
-                net = slim.conv2d(net, num_outputs=1, stride=1, kernel_size=[1, 1], scope='conv_1',
+                net = slim.conv2d(net, num_outputs=256, stride=1, kernel_size=[1, 1], scope='conv_2')
+                net = slim.conv2d(net, num_outputs=1, stride=1, kernel_size=[1, 1], scope='conv_3',
                                   activation_fn=None, normalizer_fn=None)
         return net
 
