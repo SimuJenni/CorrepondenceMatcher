@@ -91,7 +91,7 @@ class CMNetTrainer:
             roi_pred = preds[i]
             roi_target = rois[i]
             tf.contrib.losses.mean_squared_error(predictions=roi_pred, labels=roi_target, scope=scope)
-            non_targets = rois.remove(roi_target)
+            non_targets = rois[:i] + rois[i+1:]
             for non_target in non_targets:
                 d = roi_pred - non_target
                 d_square = tf.reduce_sum(tf.square(d), [1, 2, 3])
