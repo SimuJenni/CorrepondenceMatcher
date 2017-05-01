@@ -90,7 +90,7 @@ class CMNetTrainer:
         for i in range(self.num_roi):
             roi_pred = preds[i]
             roi_target = rois[i]
-            tf.contrib.losses.mean_squared_error(roi_pred, roi_target, scope=scope)
+            tf.contrib.losses.mean_squared_error(predictions=roi_pred, labels=roi_target, scope=scope)
             non_targets = rois.remove(roi_target)
             for non_target in non_targets:
                 d = roi_pred - non_target
@@ -98,7 +98,7 @@ class CMNetTrainer:
                 d = tf.sqrt(d_square)
                 d_m = margin - d
                 d_trunc = tf.maximum(d_m, 0)
-                tf.contrib.losses.mean_squared_error(d_trunc, tf.zeros_like(d_trunc), scope=scope)
+                tf.contrib.losses.mean_squared_error(predictions=d_trunc, labels=tf.zeros_like(d_trunc), scope=scope)
         losses_roi = slim.losses.get_losses(scope)
         losses_roi += slim.losses.get_regularization_losses(scope)
         roi_total_loss = math_ops.add_n(losses_roi, name='total_{}'.format(scope))

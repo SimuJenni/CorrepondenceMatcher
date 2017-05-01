@@ -137,7 +137,7 @@ class CMNet:
                 net = slim.conv2d(net, num_outputs=256, stride=1, kernel_size=[1, 1], scope='conv_2')
                 net = slim.conv2d(net, num_outputs=1, stride=1, kernel_size=[1, 1], scope='conv_3',
                                   activation_fn=None, normalizer_fn=None)
-        return net
+                return net
 
     def encoder(self, net, reuse=None, training=True):
         """Builds an encoder of the given inputs.
