@@ -94,13 +94,20 @@ class CMNet:
         return preds1, preds2, rois1, rois2
 
     def split_coordinates(self, coords, num_roi):
-        print('Before split: {}'.format(coords.get_shape()))
         split = tf.split(1, num_roi, coords)
-        print('After split: {}'.format(split[0].get_shape()))
         return split
 
     def coords2indices(self, coords):
         return tf.concat(1, [tf.reshape(tf.range(self.batch_size), [self.batch_size, 1]), tf.squeeze(coords)])
+
+    def coords2context(self, coords):
+        #TODO: Get center roi index, replicate to shape [128. 8, 8, 4] and add context offsets to it.
+        idx = self.coords2indices(coords)
+        context_ind = tf.tile(idx, multiples=[1, 3, 3, 1])
+        context_ind += [[[0, -1, -1, 0], [0, 0, -1, 0], [0, 1, -1, 0]],
+                        [[0, -1, 0, 0], [0, 0, 0, 0], [0, 1, 0, 0]],
+                        [[0, -1, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0]]]
+        return context_ind
 
     def predict_roi(self, context, reuse=None, training=True):
         with tf.variable_scope('roi_regressor', reuse=reuse):
@@ -112,11 +119,10 @@ class CMNet:
     def extract_roi(self, fmap, coord):
         roi = tf.gather_nd(fmap, coord)
         roi = tf.reshape(roi, [self.batch_size, 1, 1, DEFAULT_FILTER_DIMS[-1]])
-        print('Roi: {}'.format(roi.get_shape()))
         return roi
 
     def roi_context(self, fmap, coord):
-        context_all = tf.slice(fmap, [coord[0]-1, coord[1]-1, 0], [3, 3, DEFAULT_FILTER_DIMS[-1]])
+        context_all = tf.gather_nd(fmap, coord)
         zero_context = tf.zeros_like(context_all)
         mask = np.ones([self.batch_size, 3, 3, DEFAULT_FILTER_DIMS[-1]], dtype=bool)
         mask[:, 1, 1, :] = False
