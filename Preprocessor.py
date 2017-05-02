@@ -21,7 +21,8 @@ class Preprocessor:
         if self.augment_color:
             image = dist_color(image, 0)
             image = tf.clip_by_value(image, 0.0, 1.0)
-        image.set_shape([self.target_shape[0], self.target_shape[0], 3])
+
+        image = resize_image(image, self.target_shape)
 
         # Scale to [-1, 1]
         image = tf.to_float(image) * 2. - 1.
@@ -35,19 +36,20 @@ class Preprocessor:
     def process_test(self, image):
         # Crop the central region of the image with an area containing 85% of the original image.
         image = tf.image.central_crop(image, central_fraction=0.85)
-
-        # Resize the image to the original height and width.
-        image = tf.expand_dims(image, 0)
-        image = tf.image.resize_bilinear(image, [self.target_shape[0], self.target_shape[1]], align_corners=False)
-        image = tf.squeeze(image, [0])
-
-        # Resize to output size
-        image.set_shape([self.target_shape[0], self.target_shape[1], 3])
+        image = resize_image(image, self.target_shape)
 
         # Scale to [-1, 1]
         image = tf.to_float(image) * (2. / 255.) - 1.
 
         return image
+
+
+def resize_image(image, shape):
+    image = tf.expand_dims(image, 0)
+    image = tf.image.resize_bilinear(image, [shape[0], shape[1]], align_corners=False)
+    image = tf.squeeze(image, [0])
+    image.set_shape([shape[0], shape[0], 3])
+    return image
 
 
 def distort_image(image, bbox, height, width, aspect_ratio_range=(0.9, 1.1), area_range=(0.1, 1.0)):
