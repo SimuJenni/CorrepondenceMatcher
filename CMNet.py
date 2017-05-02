@@ -116,13 +116,13 @@ class CMNet:
                 return net
 
     def extract_roi(self, fmap, coord):
-        roi = tf.gather_nd(fmap, coord)
+        roi = tf.gather_nd(fmap, coord, name='GatherND_extract_roi')
         roi = tf.reshape(roi, [self.batch_size, 1, 1, DEFAULT_FILTER_DIMS[-1]])
         return roi
 
     def roi_context(self, fmap, coord):
         context_idx = self.idx2context(coord)
-        context_all = tf.gather_nd(fmap, context_idx)
+        context_all = tf.gather_nd(fmap, context_idx, name='GatherND_roi_context')
         zero_context = tf.zeros_like(context_all)
         mask = np.ones([self.batch_size, 3, 3, DEFAULT_FILTER_DIMS[-1]], dtype=bool)
         mask[:, 1, 1, :] = False
