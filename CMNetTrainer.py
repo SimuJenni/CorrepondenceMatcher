@@ -167,6 +167,7 @@ class CMNetTrainer:
                 scope = 'roi_pred_loss'
                 roi_pred_loss = self.roi_prediction_loss(preds1, rois1, margin=margin, scope=scope)
                 roi_pred_loss += self.roi_prediction_loss(preds2, rois2, margin=margin, scope=scope)
+                tf.scalar_summary('losses/roi_pred_loss', roi_pred_loss)
 
                 # Handle dependencies with update_ops (batch-norm)
                 update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
@@ -196,6 +197,12 @@ class CMNetTrainer:
                 # Create the model
                 rois1, pred2, roi1 = self.model.predict(imgs1, coords1, self.num_roi, reuse=None)
                 rois2, pred1, roi2 = self.model.predict(imgs2, coords2, self.num_roi, reuse=True)
+
+                print('imgs: {}'.format(imgs1.get_shape()))
+                print('coords: {}'.format(coords1.get_shape()))
+                print('rois: {}'.format(rois1.get_shape()))
+                print('pred: {}'.format(pred2.get_shape()))
+                print('roi: {}'.format(roi2.get_shape()))
 
                 # Make summaries
                 dist_img1 = tf.reduce_mean(tf.square(rois1-pred1), axis=-1)
