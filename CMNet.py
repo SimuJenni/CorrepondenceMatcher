@@ -129,13 +129,13 @@ class CMNet:
     def roi_context(self, fmap, coord):
         context_inds = self.idx2context(coord)
         context_rois = [self.extract_roi(fmap, idx) for idx in context_inds]
-        context = tf.stack(context_rois, axis=-1)
+        context = tf.concat(3, context_rois)
         # context_all = tf.gather_nd(fmap, context_idx, name='GatherND_roi_context')
         # zero_context = tf.zeros_like(context_all)
         # mask = np.ones([self.batch_size, 3, 3, DEFAULT_FILTER_DIMS[-1]], dtype=bool)
         # mask[:, 1, 1, :] = False
         # context = tf.select(mask, context_all, zero_context)
-        print(tf.shape(context))
+        print(context.get_shape())
         return context
 
     def roi_classifier(self, roi1, roi2, reuse=None, training=True):
