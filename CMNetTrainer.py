@@ -77,6 +77,28 @@ class CMNetTrainer:
                                                             capacity=self.model.batch_size)
             return imgs1, imgs2, coords1, coords2
 
+    def get_test_batch(self):
+        with tf.device('/cpu:0'):
+            # Get the training dataset
+            test_set = self.dataset.get_testset()
+            self.num_eval_steps = (self.dataset.get_num_test() / self.model.batch_size)
+            provider = slim.dataset_data_provider.DatasetDataProvider(test_set, num_readers=1, shuffle=False)
+
+            [img1] = provider.get(['image'])
+            coords1 = self.create_train_coordinates(img1)
+            img2 = tf.identity(img1)
+            coords2 = tf.identity(coords1)
+
+            # Preprocess data
+            img1, coords1 = self.pre_processor.process_test(img1, coords1)
+            img2, coords2 = self.pre_processor.process_test(img2, coords2)
+
+            # Make batches
+            imgs1, imgs2, coords1, coords2 = tf.train.batch([img1, img2, coords1, coords2],
+                                                            batch_size=self.model.batch_size,
+                                                            num_threads=1)
+            return imgs1, imgs2, coords1, coords2
+
     def create_train_coordinates(self, img):
         """Creates roi coordinates for training..
         Args:
@@ -162,3 +184,41 @@ class CMNetTrainer:
                                     save_interval_secs=3000,
                                     log_every_n_steps=100,
                                     number_of_steps=self.num_train_steps)
+
+    def test(self):
+        with self.sess.as_default():
+            with self.graph.as_default():
+                imgs1, imgs2, coords1, coords2 = self.get_test_batch()
+
+                # Create the model
+                rois1, pred2, roi1 = self.model.predict(imgs1, coords1, reuse=None)
+                rois2, pred1, roi2 = self.model.predict(imgs2, coords2, reuse=True)
+
+                # Make summaries
+                dist_img1 = tf.reduce_mean(tf.square(rois1-pred1), axis=-1)
+                tf.image_summary('imgs/dist_img1', montage_tf(dist_img1, 1, self.im_per_smry), max_images=1)
+
+                names_to_values, names_to_updates = slim.metrics.aggregate_metric_map({
+                    'mse1': slim.metrics.streaming_mean_squared_error(pred1, roi1),
+                    'mse2': slim.metrics.streaming_mean_squared_error(pred2, roi1),
+                })
+
+                summary_ops = []
+                for metric_name, metric_value in names_to_values.iteritems():
+                    op = tf.scalar_summary(metric_name, metric_value)
+                    op = tf.Print(op, [metric_value], metric_name)
+                    summary_ops.append(op)
+
+                summary_ops.append(tf.image_summary('imgs/dist_img1', montage_tf(dist_img1, 1, self.im_per_smry),
+                                                    max_images=1))
+                summary_ops.append(tf.image_summary('imgs/dist_img1', montage_tf(dist_img1, 1, self.im_per_smry),
+                                                    max_images=1))
+
+                # Start evaluation
+                slim.evaluation.evaluation_loop('', self.get_save_dir(), self.get_save_dir(),
+                                                num_evals=self.num_eval_steps,
+                                                max_number_of_evaluations=1,
+                                                eval_op=names_to_updates.values(),
+                                                summary_op=tf.merge_summary(summary_ops))
+
+

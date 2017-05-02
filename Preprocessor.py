@@ -33,15 +33,23 @@ class Preprocessor:
 
         return image, coord
 
-    def process_test(self, image):
-        # Crop the central region of the image with an area containing 85% of the original image.
-        image = tf.image.central_crop(image, central_fraction=0.85)
+    def process_test(self, image, coord):
+        # Color and contrast augmentation
+        image = tf.to_float(image) / 255.
+        if self.augment_color:
+            image = dist_color(image, 0)
+            image = tf.clip_by_value(image, 0.0, 1.0)
+
         image = resize_image(image, self.target_shape)
 
         # Scale to [-1, 1]
-        image = tf.to_float(image) * (2. / 255.) - 1.
+        image = tf.to_float(image) * 2. - 1.
 
-        return image
+        # TODO: Adjust flip with coord
+        # Flip left-right
+        # image = tf.image.random_flip_left_right(image)
+
+        return image, coord
 
 
 def resize_image(image, shape):

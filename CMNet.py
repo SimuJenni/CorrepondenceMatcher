@@ -92,6 +92,18 @@ class CMNet:
             preds2.append(self.predict_roi(context2, reuse=True, training=training))
         return preds1, preds2, rois1, rois2
 
+    def predict(self, imgs, coords, reuse=None, training=False):
+        rois = []
+        preds = []
+
+        enc = self.encoder(imgs, reuse=reuse, training=training)
+        for i, c in enumerate(coords):
+            idx = self.coords2indices(c)
+            rois.append(self.extract_roi(enc, idx))
+            context = self.roi_context(enc, idx)
+            preds.append(self.predict_roi(context, reuse=reuse if i == 0 else True, training=training))
+        return enc, preds, rois
+
     def split_coordinates(self, coords, num_roi):
         split = tf.split(1, num_roi, coords)
         return split
