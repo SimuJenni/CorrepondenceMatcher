@@ -1,10 +1,10 @@
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
-from layers import lrelu, merge
+from layers import merge
 
 DEFAULT_FILTER_DIMS = [64, 96, 160, 256, 256]
 DEFAULT_KERNELS = [3, 1, 3, 1, 3]
-DEFAULT_STRIDES = [2, 1, 2, 1, 1]
+DEFAULT_STRIDES = [2, 1, 2, 1, 2]
 
 
 def cmnet_argscope(activation=tf.nn.relu, kernel_size=(3, 3), padding='SAME', training=True, center=True,
