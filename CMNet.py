@@ -106,9 +106,13 @@ class CMNet:
         # context_ind += [[[[0, -1, -1], [0, 0, -1], [0, 1, -1]],
         #                 [[0, -1, 0], [0, 0, 0], [0, 1, 0]],
         #                 [[0, -1, 1], [0, 0, 1], [0, 1, 1]]]]
-        context_ind = idx + [[0, -1, -1], [0, 0, -1], [0, 1, -1], [0, -1, 0], [0, 0, 0], [0, 1, 0], [0, -1, 1],
-                                 [0, 0, 1], [0, 1, 1]]
-        return context_ind
+
+        context_inds = []
+        context_offsets = [[0, -1, -1], [0, 0, -1], [0, 1, -1], [0, -1, 0], [0, 1, 0], [0, -1, 1], [0, 0, 1], [0, 1, 1]]
+        for offset in context_offsets:
+            context_inds.append(idx + offset)
+
+        return context_inds
 
     def predict_roi(self, context, reuse=None, training=True):
         with tf.variable_scope('roi_regressor', reuse=reuse):
@@ -123,12 +127,14 @@ class CMNet:
         return roi
 
     def roi_context(self, fmap, coord):
-        context_idx = self.idx2context(coord)
-        context_all = tf.gather_nd(fmap, context_idx, name='GatherND_roi_context')
-        zero_context = tf.zeros_like(context_all)
-        mask = np.ones([self.batch_size, 3, 3, DEFAULT_FILTER_DIMS[-1]], dtype=bool)
-        mask[:, 1, 1, :] = False
-        context = tf.select(mask, context_all, zero_context)
+        context_inds = self.idx2context(coord)
+        context_rois = [self.extract_roi(fmap, idx) for idx in context_inds]
+        context = tf.stack(context_rois, axis=-1)
+        # context_all = tf.gather_nd(fmap, context_idx, name='GatherND_roi_context')
+        # zero_context = tf.zeros_like(context_all)
+        # mask = np.ones([self.batch_size, 3, 3, DEFAULT_FILTER_DIMS[-1]], dtype=bool)
+        # mask[:, 1, 1, :] = False
+        # context = tf.select(mask, context_all, zero_context)
         return context
 
     def roi_classifier(self, roi1, roi2, reuse=None, training=True):
