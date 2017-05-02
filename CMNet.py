@@ -135,6 +135,7 @@ class CMNet:
         # mask = np.ones([self.batch_size, 3, 3, DEFAULT_FILTER_DIMS[-1]], dtype=bool)
         # mask[:, 1, 1, :] = False
         # context = tf.select(mask, context_all, zero_context)
+        print(tf.shape(context))
         return context
 
     def roi_classifier(self, roi1, roi2, reuse=None, training=True):
