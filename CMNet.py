@@ -1,14 +1,13 @@
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from layers import lrelu, merge
-import numpy as np
 
 DEFAULT_FILTER_DIMS = [64, 96, 160, 256, 256]
 DEFAULT_KERNELS = [3, 1, 3, 1, 3]
-DEFAULT_STRIDES = [2, 1, 2, 1, 2]
+DEFAULT_STRIDES = [2, 1, 2, 1, 1]
 
 
-def cmnet_argscope(activation=lrelu, kernel_size=(3, 3), padding='SAME', training=True, center=True,
+def cmnet_argscope(activation=tf.nn.relu, kernel_size=(3, 3), padding='SAME', training=True, center=True,
                    w_reg=0.0001, fix_bn=False):
     """Defines default parameter values for all the layers used in ToonNet.
 
@@ -101,12 +100,6 @@ class CMNet:
         return tf.concat(1, [tf.reshape(tf.range(self.batch_size), [self.batch_size, 1]), tf.squeeze(coords)])
 
     def idx2context(self, idx):
-        # idx = tf.reshape(idx, shape=[self.batch_size, 1, 1, 3])
-        # context_ind = tf.tile(idx, multiples=[1, 3, 3, 1])
-        # context_ind += [[[[0, -1, -1], [0, 0, -1], [0, 1, -1]],
-        #                 [[0, -1, 0], [0, 0, 0], [0, 1, 0]],
-        #                 [[0, -1, 1], [0, 0, 1], [0, 1, 1]]]]
-
         context_inds = []
         context_offsets = [[0, -1, -1], [0, 0, -1], [0, 1, -1], [0, -1, 0], [0, 1, 0], [0, -1, 1], [0, 0, 1], [0, 1, 1]]
         for offset in context_offsets:
@@ -130,12 +123,6 @@ class CMNet:
         context_inds = self.idx2context(coord)
         context_rois = [self.extract_roi(fmap, idx) for idx in context_inds]
         context = tf.concat(3, context_rois)
-        # context_all = tf.gather_nd(fmap, context_idx, name='GatherND_roi_context')
-        # zero_context = tf.zeros_like(context_all)
-        # mask = np.ones([self.batch_size, 3, 3, DEFAULT_FILTER_DIMS[-1]], dtype=bool)
-        # mask[:, 1, 1, :] = False
-        # context = tf.select(mask, context_all, zero_context)
-        print(context.get_shape())
         return context
 
     def roi_classifier(self, roi1, roi2, reuse=None, training=True):
@@ -164,7 +151,9 @@ class CMNet:
         k_sizes = DEFAULT_KERNELS
         with tf.variable_scope('encoder', reuse=reuse):
             with slim.arg_scope(cmnet_argscope(padding='SAME', training=training)):
-                for l in range(0, self.num_layers):
+                for l in range(0, self.num_layers-1):
                     net = slim.conv2d(net, num_outputs=f_dims[l], stride=strides[l],
                                       kernel_size=[k_sizes[l], k_sizes[l]], scope='conv_{}'.format(l + 1))
+                net = slim.conv2d(net, num_outputs=f_dims[-1], stride=strides[-1], normalizer_fn=None,
+                                  kernel_size=[k_sizes[-1], k_sizes[-1]], scope='conv_{}'.format(self.num_layers))
                 return net
