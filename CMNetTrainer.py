@@ -198,17 +198,14 @@ class CMNetTrainer:
                 rois1, pred2, roi1 = self.model.predict(imgs1, coords1, self.num_roi, reuse=None)
                 rois2, pred1, roi2 = self.model.predict(imgs2, coords2, self.num_roi, reuse=True)
 
-                d1 = rois1-pred1[0]
-
                 print('imgs: {}'.format(imgs1.get_shape()))
                 print('coords: {}'.format(coords1.get_shape()))
                 print('rois: {}'.format(rois1.get_shape()))
                 print('pred: {}'.format(pred2[0].get_shape()))
                 print('roi: {}'.format(roi2[0].get_shape()))
-                print('diff: {}'.format(d1.get_shape()))
 
                 # Make summaries
-                dist_img1 = tf.reduce_mean(tf.square(rois1-pred1[0]), axis=3)
+                dist_img1 = tf.reduce_mean(tf.square(rois1-pred1[0]), axis=3, keep_dims=True)
                 tf.image_summary('imgs/dist_img1', montage_tf(dist_img1, 1, self.im_per_smry), max_images=1)
 
                 names_to_values, names_to_updates = slim.metrics.aggregate_metric_map({
