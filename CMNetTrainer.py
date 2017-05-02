@@ -188,10 +188,10 @@ class CMNetTrainer:
                                     log_every_n_steps=100,
                                     number_of_steps=self.num_train_steps)
 
-    def test(self):
+    def test(self, num_eval=None):
         with self.sess.as_default():
             with self.graph.as_default():
-                imgs1, imgs2, coords1, coords2 = self.get_test_batch()
+                imgs1, imgs2, coords1, coords2 = self.get_test_batch(num_eval)
 
                 # Create the model
                 rois1, pred2, roi1 = self.model.predict(imgs1, coords1, self.num_roi, reuse=None)
