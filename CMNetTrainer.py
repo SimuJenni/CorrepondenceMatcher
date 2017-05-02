@@ -77,11 +77,14 @@ class CMNetTrainer:
                                                             capacity=self.model.batch_size)
             return imgs1, imgs2, coords1, coords2
 
-    def get_test_batch(self):
+    def get_test_batch(self, num_eval=None):
         with tf.device('/cpu:0'):
             # Get the training dataset
             test_set = self.dataset.get_testset()
-            self.num_eval_steps = (self.dataset.get_num_test() / self.model.batch_size)
+            if num_eval:
+                self.num_eval_steps = num_eval
+            else:
+                self.num_eval_steps = (self.dataset.get_num_test() / self.model.batch_size)
             provider = slim.dataset_data_provider.DatasetDataProvider(test_set, num_readers=1, shuffle=False)
 
             [img1] = provider.get(['image'])
