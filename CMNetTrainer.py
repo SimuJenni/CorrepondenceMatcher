@@ -191,8 +191,8 @@ class CMNetTrainer:
                 imgs1, imgs2, coords1, coords2 = self.get_test_batch()
 
                 # Create the model
-                rois1, pred2, roi1 = self.model.predict(imgs1, coords1, reuse=None)
-                rois2, pred1, roi2 = self.model.predict(imgs2, coords2, reuse=True)
+                rois1, pred2, roi1 = self.model.predict(imgs1, coords1, self.num_roi, reuse=None)
+                rois2, pred1, roi2 = self.model.predict(imgs2, coords2, self.num_roi, reuse=True)
 
                 # Make summaries
                 dist_img1 = tf.reduce_mean(tf.square(rois1-pred1), axis=-1)
