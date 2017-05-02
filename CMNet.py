@@ -106,12 +106,9 @@ class CMNet:
         # context_ind += [[[[0, -1, -1], [0, 0, -1], [0, 1, -1]],
         #                 [[0, -1, 0], [0, 0, 0], [0, 1, 0]],
         #                 [[0, -1, 1], [0, 0, 1], [0, 1, 1]]]]
-
-        idx = tf.reshape(idx, shape=[self.batch_size, 1, 1])
-        context_ind = tf.tile(idx, multiples=[1, 3, 3])
-        context_ind += [[[[0, -1, -1], [0, 0, -1], [0, 1, -1]],
+        context_ind = idx + [[[0, -1, -1], [0, 0, -1], [0, 1, -1]],
                         [[0, -1, 0], [0, 0, 0], [0, 1, 0]],
-                        [[0, -1, 1], [0, 0, 1], [0, 1, 1]]]]
+                        [[0, -1, 1], [0, 0, 1], [0, 1, 1]]]
         return context_ind
 
     def predict_roi(self, context, reuse=None, training=True):
