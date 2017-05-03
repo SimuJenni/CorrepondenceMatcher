@@ -137,13 +137,13 @@ class CMNetTrainer:
         losses_roi_pred = slim.losses.get_losses(roi_pred_scope)
         losses_roi_pred += slim.losses.get_regularization_losses(roi_pred_scope)
         roi_pred_loss = math_ops.add_n(losses_roi_pred, name='total_{}'.format(roi_pred_scope))
-        tf.scalar_summary('losses/roi_pred_loss', roi_pred_loss)
+        tf.scalar_summary('losses/{}'.format(roi_pred_scope), roi_pred_loss)
 
         # All roi-contrast
         losses_roi_contrast = slim.losses.get_losses(roi_contrast_scope)
         losses_roi_contrast += slim.losses.get_regularization_losses(roi_contrast_scope)
         roi_contrast_loss = math_ops.add_n(losses_roi_contrast, name='total_{}'.format(roi_contrast_scope))
-        tf.scalar_summary('losses/roi_contrast_loss', roi_contrast_loss)
+        tf.scalar_summary('losses/{}'.format(roi_contrast_scope), roi_contrast_loss)
 
         return roi_contrast_loss + roi_pred_loss
 
