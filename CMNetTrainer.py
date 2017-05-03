@@ -118,11 +118,11 @@ class CMNetTrainer:
         shape = (self.num_roi, 2)
         return tf.random_uniform(shape=shape, minval=0.1, maxval=0.9)
 
-    def roi_prediction_loss(self, preds, rois, margin, scope):
+    def roi_prediction_loss(self, preds, rois, margin, roi_pred_scope, roi_contrast_scope):
         for i in range(self.num_roi):
             roi_pred = preds[i]
             roi_target = rois[i]
-            tf.contrib.losses.mean_squared_error(predictions=roi_pred, labels=roi_target, scope=scope)
+            tf.contrib.losses.mean_squared_error(predictions=roi_pred, labels=roi_target, scope=roi_pred_scope)
             non_targets = rois[:i] + rois[i+1:]
             for non_target in non_targets:
                 d = roi_pred - non_target
@@ -130,11 +130,21 @@ class CMNetTrainer:
                 d = tf.sqrt(d_square)
                 d_m = margin - d
                 d_trunc = tf.maximum(d_m, 0)
-                tf.contrib.losses.mean_squared_error(predictions=d_trunc, labels=tf.zeros_like(d_trunc), scope=scope)
-        losses_roi = slim.losses.get_losses(scope)
-        losses_roi += slim.losses.get_regularization_losses(scope)
-        roi_total_loss = math_ops.add_n(losses_roi, name='total_{}'.format(scope))
-        return roi_total_loss
+                tf.contrib.losses.mean_squared_error(predictions=d_trunc, labels=tf.zeros_like(d_trunc),
+                                                     scope=roi_contrast_scope)
+
+        # All roi-pred
+        losses_roi_pred = slim.losses.get_losses(roi_pred_scope)
+        tf.scalar_summary('losses/roi_pred_loss', losses_roi_pred)
+        losses_roi_pred += slim.losses.get_regularization_losses(roi_pred_scope)
+        roi_pred_loss = math_ops.add_n(losses_roi_pred, name='total_{}'.format(roi_pred_scope))
+
+        # All roi-contrast
+        losses_roi_contrast = slim.losses.get_losses(roi_contrast_scope)
+        tf.scalar_summary('losses/roi_contrast_loss', losses_roi_contrast)
+        losses_roi_contrast += slim.losses.get_regularization_losses(roi_contrast_scope)
+        roi_contrast_loss = math_ops.add_n(losses_roi_contrast, name='total_{}'.format(roi_contrast_scope))
+        return roi_contrast_loss + roi_pred_loss
 
     def make_train_op(self, loss, vars2train=None, scope=None):
         if scope:
@@ -171,10 +181,10 @@ class CMNetTrainer:
 
                 # Compute losses
                 margin = 10
-                scope = 'roi_pred_loss'
-                roi_pred_loss = self.roi_prediction_loss(preds1, rois1, margin=margin, scope=scope)
-                roi_pred_loss += self.roi_prediction_loss(preds2, rois2, margin=margin, scope=scope)
-                tf.scalar_summary('losses/roi_pred_loss', roi_pred_loss)
+                roi_pred_scope = 'roi_pred_loss'
+                roi_contrast_scope = 'roi_contrast_loss'
+                roi_pred_loss = self.roi_prediction_loss(preds1, rois1, margin, roi_pred_scope, roi_contrast_scope)
+                roi_pred_loss += self.roi_prediction_loss(preds2, rois2, margin, roi_pred_scope, roi_contrast_scope)
 
                 # Handle dependencies with update_ops (batch-norm)
                 update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)

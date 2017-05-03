@@ -176,7 +176,7 @@ class CMNet:
                     if strides[l] > 1:
                         net = slim.max_pool2d(net, kernel_size=[3, 3], stride=strides[l], scope='pool_{}'.format(l))
 
-                net = slim.conv2d(net, num_outputs=f_dims[-1],kernel_size=[k_sizes[-1], k_sizes[-1]],
+                net = slim.conv2d(net, num_outputs=f_dims[-1], kernel_size=[k_sizes[-1], k_sizes[-1]],
                                   scope='conv_{}'.format(self.num_layers), normalizer_fn=None)
                 if strides[-1] > 1:
                     net = slim.max_pool2d(net, kernel_size=[3, 3], stride=strides[-1],
