@@ -87,7 +87,7 @@ class Preprocessor:
         # Modify the coordinates of the RoI accordingly
         coords = tf.to_int32(coords * [self.im_shape[:2]])
         coords -= bbox_begin[:2]
-        scale = self.target_shape[:2] / bbox_size[:2]
+        scale = tf.to_float(self.target_shape[:2] / bbox_size[:2])
         coords = tf.to_float(coords) * scale
         return distorted_image, coords
 
