@@ -56,7 +56,7 @@ class Preprocessor:
         return image, coord
 
     def coord2img(self, coord):
-        return tf.to_int32(coord*[self.target_shape[0]])
+        return tf.to_int32(coord*[self.target_shape[:2]])
 
 
 def resize_image(image, shape):
