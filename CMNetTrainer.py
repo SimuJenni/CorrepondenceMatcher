@@ -91,19 +91,22 @@ class CMNetTrainer:
             provider = slim.dataset_data_provider.DatasetDataProvider(test_set, num_readers=1, shuffle=False)
 
             [img1] = provider.get(['image'])
-            coords1 = self.sample_coordinates()
+            rel_coords1 = self.sample_coordinates()
+
             img2 = tf.identity(img1)
-            coords2 = tf.identity(coords1)
+            rel_coords2 = tf.identity(rel_coords1)
 
             # Preprocess data
-            img1, coords1 = self.pre_processor.process_test(img1, coords1, 0)
-            img2, coords2 = self.pre_processor.process_test(img2, coords2, 1)
+            img1, im_coords1 = self.pre_processor.process_test(img1, rel_coords1, 0)
+            img2, im_coords2 = self.pre_processor.process_test(img2, rel_coords2, 1)
+            roi_coords1 = self.model.im2roi_coords(im_coords1)
+            roi_coords2 = self.model.im2roi_coords(im_coords2)
 
             # Make batches
-            imgs1, imgs2, coords1, coords2 = tf.train.batch([img1, img2, coords1, coords2],
-                                                            batch_size=self.model.batch_size,
-                                                            num_threads=1)
-            return imgs1, imgs2, coords1, coords2
+            imgs1, imgs2, roi_coords1, roi_coords2 = tf.train.batch([img1, img2, roi_coords1, roi_coords2],
+                                                                    batch_size=self.model.batch_size,
+                                                                    num_threads=1)
+            return imgs1, imgs2, roi_coords1, roi_coords2
 
     def sample_coordinates(self):
         """Creates roi coordinates for training. Coordinates are relative to image shape
