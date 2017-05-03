@@ -243,7 +243,8 @@ class CMNetTrainer:
         scale = self.pre_processor.target_shape[:2] / self.model.sc_factor
         coord = tf.to_float(coord)/scale
         bbox = tf.tile(coord, [1, 1, 2])
-        offset = 1./(2*scale)
-        bbox += [-offset, -offset, offset, offset]
+        offset_x = 1./(2*scale[0])
+        offset_y = 1./(2*scale[1])
+        bbox += [-offset_x, -offset_y, offset_x, offset_y]
         return bbox
 
