@@ -4,7 +4,7 @@ from layers import merge
 import numpy as np
 
 DEFAULT_FILTER_DIMS = [64, 96, 160, 256, 256]
-DEFAULT_KERNELS = [3, 1, 3, 1, 3]
+DEFAULT_KERNELS = [3, 3, 3, 3, 3]
 DEFAULT_STRIDES = [2, 1, 2, 1, 2]
 
 
@@ -130,6 +130,8 @@ class CMNet:
             with slim.arg_scope(cmnet_argscope(padding='SAME', training=training)):
                 net = slim.conv2d(context, num_outputs=512, stride=1, kernel_size=[3, 3], scope='conv_1')
                 net = slim.conv2d(net, num_outputs=256, stride=1, kernel_size=[1, 1], scope='conv_2')
+                net = slim.conv2d(net, num_outputs=256, stride=1, kernel_size=[1, 1], scope='conv_3',
+                                  normalizer_fn=None)
                 return net
 
     def extract_roi(self, fmap, coord):
@@ -170,8 +172,14 @@ class CMNet:
         with tf.variable_scope('encoder', reuse=reuse):
             with slim.arg_scope(cmnet_argscope(padding='SAME', training=training)):
                 for l in range(0, self.num_layers-1):
-                    net = slim.conv2d(net, num_outputs=f_dims[l], stride=strides[l],
-                                      kernel_size=[k_sizes[l], k_sizes[l]], scope='conv_{}'.format(l + 1))
-                net = slim.conv2d(net, num_outputs=f_dims[-1], stride=strides[-1], normalizer_fn=None,
-                                  kernel_size=[k_sizes[-1], k_sizes[-1]], scope='conv_{}'.format(self.num_layers))
+                    net = slim.conv2d(net, num_outputs=f_dims[l], kernel_size=[k_sizes[l], k_sizes[l]],
+                                      scope='conv_{}'.format(l + 1))
+                    if strides[l] > 1:
+                        net = slim.max_pool2d(net, kernel_size=[3, 3], stride=strides[l], scope='pool_{}'.format(l))
+
+                net = slim.conv2d(net, num_outputs=f_dims[-1],kernel_size=[k_sizes[-1], k_sizes[-1]],
+                                  scope='conv_{}'.format(self.num_layers), normalizer_fn=None)
+                if strides[-1] > 1:
+                    net = slim.max_pool2d(net, kernel_size=[3, 3], stride=strides[-1],
+                                          scope='pool_{}'.format(self.num_layers))
                 return net
