@@ -113,8 +113,7 @@ class CMNetTrainer:
             img:
         """
         shape = (self.num_roi, 2)
-        tf.random_uniform(shape=shape, minval=0.1, maxval=0.9)
-        return tf.random_uniform(shape=shape)
+        return tf.random_uniform(shape=shape, minval=0.1, maxval=0.9)
 
     def roi_prediction_loss(self, preds, rois, margin, scope):
         for i in range(self.num_roi):
