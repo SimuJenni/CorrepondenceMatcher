@@ -220,6 +220,8 @@ class CMNetTrainer:
                     op = tf.Print(op, [metric_value], metric_name)
                     summary_ops.append(op)
 
+                imgs1 = tf.image.draw_bounding_boxes(imgs1, self.roic2bbox(coords1), name=None)
+
                 summary_ops.append(tf.image_summary('imgs/dist_img1', montage_tf(dist_img1, 1, self.im_per_smry),
                                                     max_images=1))
                 summary_ops.append(tf.image_summary('imgs/dist_img2', montage_tf(dist_img2, 1, self.im_per_smry),
@@ -236,4 +238,10 @@ class CMNetTrainer:
                                                 eval_op=names_to_updates.values(),
                                                 summary_op=tf.merge_summary(summary_ops))
 
+    def roic2bbox(self, coord):
+        scale = self.pre_processor.target_shape / self.model.sc_factor
+        coord = tf.to_float(coord/scale)
+        bbox = tf.tile(coord, [1, 1, 2])
+        bbox += [-0.01, -0.01, 0.01, 0.01]
+        return bbox
 
