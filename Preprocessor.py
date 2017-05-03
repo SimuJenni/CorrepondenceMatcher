@@ -9,11 +9,13 @@ slim = tf.contrib.slim
 
 
 class Preprocessor:
-    def __init__(self, target_shape, augment_color=False, aspect_ratio_range=(0.9, 1.1), area_range=(0.9, 1.0)):
+    def __init__(self, target_shape, augment_color=False, aspect_ratio_range=(0.9, 1.1), area_range=(0.9, 1.0),
+                 im_shape=None):
         self.target_shape = target_shape
         self.augment_color = augment_color
         self.aspect_ratio_range = aspect_ratio_range
         self.area_range = area_range
+        self.im_shape = im_shape
 
     def process_train(self, image, coord, thread_id=0, distort=False):
         # Color and contrast augmentation
@@ -65,8 +67,7 @@ class Preprocessor:
         return tf.to_int32(coord*[self.target_shape[:2]])
 
     def distort_image(self, image, coords):
-        im_shape = image.get_shape()
-        bbox = self.coord2bbox(coords, im_shape)
+        bbox = self.coord2bbox(coords, self.im_shape)
         bbox_begin, bbox_size, distort_bbox = tf.image.sample_distorted_bounding_box(
             tf.shape(image),
             bbox,

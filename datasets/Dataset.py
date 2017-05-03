@@ -20,6 +20,7 @@ class Dataset:
         self.num_classes = None
         self.file_pattern = '%s-*'
         self.is_multilabel = False
+        self.im_shape = None
 
     def get_trainset(self):
         pass

@@ -26,6 +26,7 @@ class ImageNet(Dataset):
         self.num_classes = 1000
         self.label_offset = 1
         self.name = 'imagenet'
+        self.im_shape = [256, 256, 3]
 
     def get_keys_to_features(self):
         keys_to_features = {
