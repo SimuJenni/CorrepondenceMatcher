@@ -15,16 +15,19 @@ class Preprocessor:
         self.aspect_ratio_range = aspect_ratio_range
         self.area_range = area_range
 
-    def process_train(self, image, coord, thread_id=0):
+    def process_train(self, image, coord, thread_id=0, distort=False):
         # Color and contrast augmentation
         image = tf.to_float(image) / 255.
         if self.augment_color:
             image = dist_color(image, thread_id)
             image = tf.clip_by_value(image, 0.0, 1.0)
 
-        # Resize image to target size and map coordinates to pixel coordinates
-        image = resize_image(image, self.target_shape)
-        coord = self.coord2img(coord)
+        if distort:
+            image, coord = self.distort_image(image, coord)
+        else:
+            # Resize image to target size and map coordinates to pixel coordinates
+            image = resize_image(image, self.target_shape)
+            coord = self.coord2img(coord)
 
         # Scale to [-1, 1]
         image = tf.to_float(image) * 2. - 1.
@@ -35,16 +38,19 @@ class Preprocessor:
 
         return image, coord
 
-    def process_test(self, image, coord, thread_id=0):
+    def process_test(self, image, coord, thread_id=0, distort=False):
         # Color and contrast augmentation
         image = tf.to_float(image) / 255.
         if self.augment_color:
             image = dist_color(image, thread_id)
             image = tf.clip_by_value(image, 0.0, 1.0)
 
-        # Resize image to target size and map coordinates to pixel coordinates
-        image = resize_image(image, self.target_shape)
-        coord = self.coord2img(coord)
+        if distort:
+            image, coord = self.distort_image(image, coord)
+        else:
+            # Resize image to target size and map coordinates to pixel coordinates
+            image = resize_image(image, self.target_shape)
+            coord = self.coord2img(coord)
 
         # Scale to [-1, 1]
         image = tf.to_float(image) * 2. - 1.
@@ -58,6 +64,37 @@ class Preprocessor:
     def coord2img(self, coord):
         return tf.to_int32(coord*[self.target_shape[:2]])
 
+    def distort_image(self, image, coords):
+        im_shape = image.get_shape()
+        bbox = self.coord2bbox(coords, im_shape)
+        bbox_begin, bbox_size, distort_bbox = tf.image.sample_distorted_bounding_box(
+            tf.shape(image),
+            bbox,
+            aspect_ratio_range=self.aspect_ratio_range,
+            area_range=self.area_range,
+            use_image_if_no_bounding_boxes=True,
+            min_object_covered=1.0)
+
+        # Crop the image to the specified bounding box.
+        distorted_image = tf.slice(image, bbox_begin, bbox_size)
+        distorted_image = tf.expand_dims(distorted_image, 0)
+        resized_image = tf.image.resize_bilinear(distorted_image, self.target_shape[:2], align_corners=False)
+        distorted_image = tf.squeeze(resized_image)
+        distorted_image.set_shape(self.target_shape)
+
+        # Modify the coordinates of the RoI accordingly
+        coords -= bbox_begin
+        scale = self.target_shape[:2] / bbox_size
+        coords *= scale
+        return distorted_image, coords
+
+    def coord2bbox(self, coord, image_shape):
+        scale = image_shape[:2]
+        coord *= scale
+        bbox = tf.tile(coord, [1, 1, 2])
+        bbox += [-2, -2, 2, 2]
+        return bbox
+
 
 def resize_image(image, shape):
     image = tf.expand_dims(image, 0)
@@ -65,25 +102,6 @@ def resize_image(image, shape):
     image = tf.squeeze(image, [0])
     image.set_shape([shape[0], shape[0], 3])
     return image
-
-
-def distort_image(image, bbox, height, width, aspect_ratio_range=(0.9, 1.1), area_range=(0.1, 1.0)):
-    sample_distorted_bounding_box = tf.image.sample_distorted_bounding_box(
-        tf.shape(image),
-        bbox,
-        aspect_ratio_range=aspect_ratio_range,
-        area_range=area_range,
-        use_image_if_no_bounding_boxes=True,
-        min_object_covered=0.9)
-    bbox_begin, bbox_size, distort_bbox = sample_distorted_bounding_box
-
-    # Crop the image to the specified bounding box.
-    distorted_image = tf.slice(image, bbox_begin, bbox_size)
-    distorted_image = tf.expand_dims(distorted_image, 0)
-    resized_image = tf.image.resize_bilinear(distorted_image, [height, width], align_corners=False)
-    distorted_image = tf.squeeze(resized_image)
-    distorted_image.set_shape([height, width, 3])
-    return distorted_image
 
 
 def dist_color(image, thread_id):
