@@ -99,7 +99,7 @@ class Preprocessor:
         min_coord = tf.reduce_min(coord, axis=1, keep_dims=True)
         bbox = tf.concat(2, [min_coord, max_coord])
         # bbox = tf.tile(coord, [1, 1, 2])
-        # bbox += [-0.1, -0.1, 0.1, 0.1]
+        bbox += [-0.05, -0.05, 0.05, 0.05]
         return bbox
 
 
