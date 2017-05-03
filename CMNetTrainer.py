@@ -98,7 +98,7 @@ class CMNetTrainer:
 
             # Preprocess data
             img1, im_coords1 = self.pre_processor.process_test(img1, rel_coords1, 0)
-            img2, im_coords2 = self.pre_processor.process_test(img2, rel_coords2, 1)
+            img2, im_coords2 = self.pre_processor.process_test(img2, rel_coords2, 1, True)
             roi_coords1 = self.model.im2roi_coords(im_coords1)
             roi_coords2 = self.model.im2roi_coords(im_coords2)
 
