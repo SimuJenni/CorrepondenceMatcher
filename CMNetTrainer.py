@@ -239,9 +239,9 @@ class CMNetTrainer:
                                                 summary_op=tf.merge_summary(summary_ops))
 
     def roic2bbox(self, coord):
-        scale = self.pre_processor.target_shape[:2] / self.model.sc_factor
-        coord = tf.to_float(coord/scale)
+        scale = tf.to_float(self.pre_processor.target_shape[:2] / self.model.sc_factor)
+        coord = coord/scale
         bbox = tf.tile(coord, [1, 1, 2])
-        bbox += [-0.01, -0.01, 0.01, 0.01]
+        bbox += [-0.02, -0.02, 0.02, 0.02]
         return bbox
 
