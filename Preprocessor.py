@@ -67,7 +67,8 @@ class Preprocessor:
         return tf.to_int32(coord*[self.target_shape[:2]])
 
     def distort_image(self, image, coords):
-        bbox = self.coord2bbox(coords, self.im_shape)
+        c_exp = tf.expand_dims(coords, 0)
+        bbox = self.coord2bbox(c_exp, self.im_shape)
         bbox_begin, bbox_size, distort_bbox = tf.image.sample_distorted_bounding_box(
             tf.shape(image),
             bbox,
