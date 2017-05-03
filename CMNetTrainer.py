@@ -24,7 +24,7 @@ class CMNetTrainer:
         self.num_roi = num_roi
         self.tag = tag
         self.additional_info = None
-        self.im_per_smry = 4
+        self.im_per_smry = 8
         self.summaries = {}
         self.pre_processor = pre_processor
         self.opt_type = optimizer
@@ -223,11 +223,11 @@ class CMNetTrainer:
                 imgs1 = tf.image.draw_bounding_boxes(imgs1, self.roic2bbox(coords1), name=None)
                 imgs2 = tf.image.draw_bounding_boxes(imgs2, self.roic2bbox(coords2), name=None)
 
-                summary_ops.append(tf.image_summary('imgs/dist_img1', montage_tf(tf.log(dist_img1), 1, self.im_per_smry),
-                                                    max_images=1))
-                summary_ops.append(tf.image_summary('imgs/dist_img2', montage_tf(tf.log(dist_img2), 1, self.im_per_smry),
+                summary_ops.append(tf.image_summary('imgs/dist_img1', montage_tf(-dist_img1, 1, self.im_per_smry),
                                                     max_images=1))
                 summary_ops.append(tf.image_summary('imgs/imgs1', montage_tf(imgs1, 1, self.im_per_smry),
+                                                    max_images=1))
+                summary_ops.append(tf.image_summary('imgs/dist_img2', montage_tf(-dist_img2, 1, self.im_per_smry),
                                                     max_images=1))
                 summary_ops.append(tf.image_summary('imgs/imgs2', montage_tf(imgs2, 1, self.im_per_smry),
                                                     max_images=1))
