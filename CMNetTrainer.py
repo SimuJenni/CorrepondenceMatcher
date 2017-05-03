@@ -181,10 +181,8 @@ class CMNetTrainer:
 
                 # Compute losses
                 margin = 10
-                roi_pred_scope = 'roi_pred_loss'
-                roi_contrast_scope = 'roi_contrast_loss'
-                roi_pred_loss = self.roi_prediction_loss(preds1, rois1, margin, roi_pred_scope, roi_contrast_scope)
-                roi_pred_loss += self.roi_prediction_loss(preds2, rois2, margin, roi_pred_scope, roi_contrast_scope)
+                roi_pred_loss = self.roi_prediction_loss(preds1, rois1, margin, 'roi_pred_loss1', 'roi_contrast_loss1')
+                roi_pred_loss += self.roi_prediction_loss(preds2, rois2, margin, 'roi_pred_loss2', 'roi_contrast_loss2')
 
                 # Handle dependencies with update_ops (batch-norm)
                 update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
