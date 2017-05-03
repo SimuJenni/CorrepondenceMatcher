@@ -183,19 +183,20 @@ class CMNetTrainer:
                 roi_pred_loss = self.roi_prediction_loss(preds1, rois1, margin, 'roi_pred_loss1', 'roi_contrast_loss1')
                 roi_pred_loss += self.roi_prediction_loss(preds2, rois2, margin, 'roi_pred_loss2', 'roi_contrast_loss2')
                 roi_pred_loss += slim.losses.get_regularization_losses()
+                total_loss = math_ops.add_n(roi_pred_loss)
 
                 # Handle dependencies with update_ops (batch-norm)
                 update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
                 if update_ops:
                     updates = tf.group(*update_ops)
-                    roi_pred_loss = control_flow_ops.with_dependencies([updates], roi_pred_loss)
+                    total_loss = control_flow_ops.with_dependencies([updates], total_loss)
 
                 # Make summaries
                 self.make_summaries()
                 # self.make_image_summaries(imgs1, dec_im1, dec_ed1, imgs2, dec_im2, dec_ed2)
 
                 # Generator training operations
-                train_op_roi_pred = self.make_train_op(roi_pred_loss, scope='encoder, roi_regressor')
+                train_op_roi_pred = self.make_train_op(total_loss, scope='encoder, roi_regressor')
 
                 # Start training
                 slim.learning.train(train_op_roi_pred, self.get_save_dir(),
