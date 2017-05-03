@@ -21,7 +21,7 @@ class CMNetTrainer:
         self.model = model
         self.dataset = dataset
         self.num_epochs = num_epochs
-        self.num_roi = num_roi
+        self.num_roi = num_roi  #TODO: Doesn't work with >1
         self.tag = tag
         self.additional_info = None
         self.im_per_smry = 8

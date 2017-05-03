@@ -67,6 +67,9 @@ class Preprocessor:
         return tf.to_int32(coord*[self.target_shape[:2]])
 
     def distort_image(self, image, coords):
+        #TODO: Can use this method but have to make sure to only feed a single bbox to sample_dist_bb that is containing all of the bboxes
+
+
         c_exp = tf.expand_dims(coords, 0)
         bbox = self.coord2bbox(c_exp)
         bbox_begin, bbox_size, distort_bbox = tf.image.sample_distorted_bounding_box(
@@ -92,8 +95,11 @@ class Preprocessor:
         return distorted_image, tf.to_int32(coords)
 
     def coord2bbox(self, coord):
-        bbox = tf.tile(coord, [1, 1, 2])
-        bbox += [-0.1, -0.1, 0.1, 0.1]
+        max_coord = tf.reduce_max(coord, axis=1, keep_dims=True)
+        min_coord = tf.reduce_min(coord, axis=1, keep_dims=True)
+        bbox = tf.concat(2, [min_coord, max_coord])
+        # bbox = tf.tile(coord, [1, 1, 2])
+        # bbox += [-0.1, -0.1, 0.1, 0.1]
         return bbox
 
 
