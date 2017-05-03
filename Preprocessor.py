@@ -9,7 +9,7 @@ slim = tf.contrib.slim
 
 
 class Preprocessor:
-    def __init__(self, target_shape, augment_color=False, aspect_ratio_range=(0.9, 1.1), area_range=(0.9, 1.0),
+    def __init__(self, target_shape, augment_color=False, aspect_ratio_range=(0.7, 1.3), area_range=(0.2, 1.0),
                  im_shape=None):
         self.target_shape = target_shape
         self.augment_color = augment_color
