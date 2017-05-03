@@ -89,7 +89,7 @@ class Preprocessor:
         coords -= bbox_begin[:2]
         scale = tf.to_float(self.target_shape[:2] / bbox_size[:2])
         coords = tf.to_float(coords) * scale
-        return distorted_image, coords
+        return distorted_image, tf.to_int32(coords)
 
     def coord2bbox(self, coord, image_shape):
         scale = image_shape[:2]
