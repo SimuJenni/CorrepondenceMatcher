@@ -221,10 +221,11 @@ class CMNetTrainer:
                     summary_ops.append(op)
 
                 imgs1 = tf.image.draw_bounding_boxes(imgs1, self.roic2bbox(coords1), name=None)
+                imgs2 = tf.image.draw_bounding_boxes(imgs2, self.roic2bbox(coords2), name=None)
 
-                summary_ops.append(tf.image_summary('imgs/dist_img1', montage_tf(dist_img1, 1, self.im_per_smry),
+                summary_ops.append(tf.image_summary('imgs/dist_img1', montage_tf(tf.log(dist_img1), 1, self.im_per_smry),
                                                     max_images=1))
-                summary_ops.append(tf.image_summary('imgs/dist_img2', montage_tf(dist_img2, 1, self.im_per_smry),
+                summary_ops.append(tf.image_summary('imgs/dist_img2', montage_tf(tf.log(dist_img2), 1, self.im_per_smry),
                                                     max_images=1))
                 summary_ops.append(tf.image_summary('imgs/imgs1', montage_tf(imgs1, 1, self.im_per_smry),
                                                     max_images=1))
@@ -242,6 +243,7 @@ class CMNetTrainer:
         scale = self.pre_processor.target_shape[:2] / self.model.sc_factor
         coord = tf.to_float(coord)/scale
         bbox = tf.tile(coord, [1, 1, 2])
-        bbox += [-0.02, -0.02, 0.02, 0.02]
+        offset = 1./(2*scale)
+        bbox += [-offset, -offset, offset, offset]
         return bbox
 
