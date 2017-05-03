@@ -93,7 +93,7 @@ class Preprocessor:
 
     def coord2bbox(self, coord):
         bbox = tf.tile(coord, [1, 1, 2])
-        bbox += [-0.04, -0.04, 0.04, 0.04]
+        bbox += [-0.1, -0.1, 0.1, 0.1]
         return bbox
 
 
