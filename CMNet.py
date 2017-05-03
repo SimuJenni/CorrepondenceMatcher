@@ -1,6 +1,7 @@
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from layers import merge
+import numpy as np
 
 DEFAULT_FILTER_DIMS = [64, 96, 160, 256, 256]
 DEFAULT_KERNELS = [3, 1, 3, 1, 3]
@@ -58,7 +59,7 @@ class CMNet:
         self.name = 'CMNet_{}'.format(tag)
         self.num_layers = num_layers
         self.batch_size = batch_size
-        self.sc_factor = 4
+        self.sc_factor = np.prod(DEFAULT_STRIDES)
 
     def net(self, im1, im2, coords1, coords2, num_roi, reuse=None, training=True):
         """
@@ -105,6 +106,9 @@ class CMNet:
             context = self.roi_context(enc, idx)
             preds.append(self.predict_roi(context, reuse=reuse if i == 0 else True, training=training))
         return enc, preds, rois
+
+    def im2roi_coords(self, coords):
+        return tf.round(coords/self.sc_factor)
 
     def split_coordinates(self, coords, num_roi):
         split = tf.split(1, num_roi, coords)

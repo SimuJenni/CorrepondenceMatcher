@@ -15,14 +15,16 @@ class Preprocessor:
         self.aspect_ratio_range = aspect_ratio_range
         self.area_range = area_range
 
-    def process_train(self, image, coord):
+    def process_train(self, image, coord, thread_id=0):
         # Color and contrast augmentation
         image = tf.to_float(image) / 255.
         if self.augment_color:
-            image = dist_color(image, 0)
+            image = dist_color(image, thread_id)
             image = tf.clip_by_value(image, 0.0, 1.0)
 
+        # Resize image to target size and map coordinates to pixel coordinates
         image = resize_image(image, self.target_shape)
+        coord = self.coord2img(coord)
 
         # Scale to [-1, 1]
         image = tf.to_float(image) * 2. - 1.
@@ -33,14 +35,16 @@ class Preprocessor:
 
         return image, coord
 
-    def process_test(self, image, coord):
+    def process_test(self, image, coord, thread_id=0):
         # Color and contrast augmentation
         image = tf.to_float(image) / 255.
         if self.augment_color:
-            image = dist_color(image, 0)
+            image = dist_color(image, thread_id)
             image = tf.clip_by_value(image, 0.0, 1.0)
 
+        # Resize image to target size and map coordinates to pixel coordinates
         image = resize_image(image, self.target_shape)
+        coord = self.coord2img(coord)
 
         # Scale to [-1, 1]
         image = tf.to_float(image) * 2. - 1.
@@ -50,6 +54,9 @@ class Preprocessor:
         # image = tf.image.random_flip_left_right(image)
 
         return image, coord
+
+    def coord2img(self, coord):
+        return tf.to_int64(coord*[self.target_shape[:2]])
 
 
 def resize_image(image, shape):
